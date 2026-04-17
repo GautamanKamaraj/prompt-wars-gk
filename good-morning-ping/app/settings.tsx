@@ -2,10 +2,32 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Switch, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { ExternalLink } from '@/components/external-link';
 
 export default function SettingsScreen() {
   const [criticalEnabled, setCriticalEnabled] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
+
+  const QUICK_LINKS = [
+    {
+      id: 'claim-credits',
+      label: 'How to claim the credits',
+      description: 'Walkthrough for the credit claim flow.',
+      href: 'https://hack2skill.com',
+    },
+    {
+      id: 'credits-claim',
+      label: 'Credits Claim',
+      description: 'Open the credits claim submission page.',
+      href: 'https://hack2skill.com',
+    },
+    {
+      id: 'make-submission',
+      label: 'How to Make a Submission?',
+      description: 'Submission checklist and publishing guide.',
+      href: 'https://hack2skill.com',
+    },
+  ];
 
   const SETTINGS_GROUPS = [
     {
@@ -81,6 +103,26 @@ export default function SettingsScreen() {
         </View>
       ))}
 
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>Submission Links</Text>
+        <View style={styles.groupCard}>
+          {QUICK_LINKS.map((item, index) => (
+            <ExternalLink key={item.id} href={item.href} style={styles.linkRow}>
+              <View style={[styles.settingItem, index !== QUICK_LINKS.length - 1 && styles.borderBottom]}>
+                <View style={[styles.settingIconWrap, { backgroundColor: 'rgba(90, 122, 255, 0.12)' }]}>
+                   <MaterialIcons name="link" size={18} color="#7aa2ff" />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>{item.label}</Text>
+                  <Text style={styles.settingDesc}>{item.description}</Text>
+                </View>
+                <MaterialIcons name="open-in-new" size={18} color="#918f99" />
+              </View>
+            </ExternalLink>
+          ))}
+        </View>
+      </View>
+
       <TouchableOpacity style={styles.logoutBtn} onPress={() => Alert.alert('Solaris', 'Session locked successfully.')}>
         <Text style={styles.logoutText}>TERMINATE SESSION</Text>
       </TouchableOpacity>
@@ -114,6 +156,7 @@ const styles = StyleSheet.create({
   settingContent: { flex: 1 },
   settingLabel: { fontSize: 15, fontWeight: 'bold', color: '#e1e0ff' },
   settingDesc: { fontSize: 12, color: '#918f99', marginTop: 2 },
+  linkRow: { textDecorationLine: 'none' },
 
   logoutBtn: { marginTop: 20, paddingVertical: 18, borderRadius: 20, backgroundColor: 'rgba(230, 89, 36, 0.1)', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(230, 89, 36, 0.2)' },
   logoutText: { color: '#e65924', fontWeight: 'bold', letterSpacing: 1.5 },
