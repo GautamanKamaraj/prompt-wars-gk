@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const INITIAL_SECONDS = 252; // 04:12
+const ALARM_ESCALATION_SECONDS = 252; // 04:12
 
 function formatTime(secs: number) {
   const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -18,7 +18,7 @@ function formatTime(secs: number) {
 export default function ProofOfLifeAlarm() {
   const [permission] = useCameraPermissions();
   const [mathFallback, setMathFallback] = useState(false);
-  const [timerLeft, setTimerLeft] = useState(INITIAL_SECONDS);
+  const [timerLeft, setTimerLeft] = useState(ALARM_ESCALATION_SECONDS);
   const [showMathInput, setShowMathInput] = useState(false);
   const [mathAnswer, setMathAnswer] = useState('');
   const cameraRef = useRef<CameraView>(null);

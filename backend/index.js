@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -60,12 +59,11 @@ app.post('/ping', async (req, res) => {
 
 // SPA Routing - send all other requests to index.html
 app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, 'public', 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(200).send('Solaris Awakening is Live (Static files missing - check backend/public)');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), (err) => {
+    if (err) {
+      res.status(200).send('Solaris Awakening is Live (Static files missing - check backend/public)');
+    }
+  });
 });
 
 const PORT = process.env.PORT || 8080;
