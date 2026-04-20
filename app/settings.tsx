@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Switch, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function SettingsScreen() {
   const [criticalEnabled, setCriticalEnabled] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
+  const [radarEnabled, setRadarEnabled] = useState(true);
+  const [stealthEnabled, setStealthEnabled] = useState(false);
 
   const SETTINGS_GROUPS = [
     {
       title: 'Security Operations',
       items: [
         { id: 'critical', label: 'Critical Alert Overrides', description: 'Bypass DND for emergency nudges', type: 'switch', value: criticalEnabled, onValueChange: setCriticalEnabled, icon: 'notifications-active' },
-        { id: 'radar', label: 'Proactive Radar Scan', description: 'Auto-scan friend anomalies', type: 'switch', value: true, icon: 'radar' },
+        { id: 'radar', label: 'Proactive Radar Scan', description: 'Auto-scan friend anomalies', type: 'switch', value: radarEnabled, onValueChange: setRadarEnabled, icon: 'radar' },
       ]
     },
     {
       title: 'Global Settings',
       items: [
         { id: 'demo', label: 'Simulator Mode', description: 'Enable mock data for judges', type: 'switch', value: demoMode, onValueChange: setDemoMode, icon: 'animation' },
-        { id: 'privacy', label: 'Stealth Presence', description: 'Hide your location from non-pinned friends', type: 'switch', value: false, icon: 'security' },
+        { id: 'privacy', label: 'Stealth Presence', description: 'Hide your location from non-pinned friends', type: 'switch', value: stealthEnabled, onValueChange: setStealthEnabled, icon: 'security' },
       ]
     }
   ];

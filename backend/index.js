@@ -1,23 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-// const admin = require('firebase-admin');
-
-// // Initialize Firebase Admin with Service Account
-// const serviceAccount = require('./serviceAccountKey.json');
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health Check
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // Serve the Solaris Web UI
-const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/ping', async (req, res) => {
   const { recipientId, senderId } = req.body;
+
+  if (!recipientId || !senderId || typeof recipientId !== 'string' || typeof senderId !== 'string') {
+    return res.status(400).json({ error: 'recipientId and senderId are required strings' });
+  }
+
   console.log(`[PING] Sender ${senderId} wants to wake up Recipient ${recipientId}`);
 
   try {
@@ -25,21 +27,17 @@ app.post('/ping', async (req, res) => {
     const pushToken = "ExponentPushToken[mock_token_here]"; // Mocked
 
     // 2. Formatting the FCM/Expo Push Payload to override DND
-    // This requires target Android channel IDs and iOS critical flags.
     const message = {
       to: pushToken,
       sound: "default",
       title: "🚨 URGENT: WAKE UP! 🚨",
       body: "Your friend is pinging you! Wake up!",
       data: { senderId },
-      // Android specific override channel
       channelId: "critical-wake-up",
-      // iOS specific critical override
       _displayInForeground: true,
       categoryId: "critical",
     };
 
-    // Sending via Expo Push API (or replace with native FCM admin API)
     const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
       headers: {
@@ -62,10 +60,15 @@ app.post('/ping', async (req, res) => {
 
 // SPA Routing - send all other requests to index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const indexPath = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(200).send('Solaris Awakening is Live (Static files missing - check backend/public)');
+  }
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`🚀 Solaris Awakening Unified Backend listening on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Solaris Awakening Unified Backend listening on port ${PORT}`);
 });

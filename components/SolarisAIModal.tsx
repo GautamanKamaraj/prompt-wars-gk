@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
-import { GoogleGenAI } from '@google/genai';
 
 interface SolarisAIModalProps {
   visible: boolean;

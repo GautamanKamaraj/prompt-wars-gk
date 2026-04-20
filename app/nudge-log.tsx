@@ -39,6 +39,11 @@ export default function NudgeLogScreen() {
   }, []);
 
   const simulateBypassPush = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('[Solaris] Notification permissions not granted');
+      return;
+    }
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "🚨 URGENT: WAKE UP! 🚨",

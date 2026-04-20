@@ -25,10 +25,6 @@ export default function SetWakeUpConfig() {
     });
   };
 
-  const setDurationAndAlert = (val: number) => {
-    setDuration(val);
-  };
-
   const handleTimeClick = () => {
     Alert.alert("Time Picker", "In a native app, this would open the bottom-sheet time selector!");
   };
@@ -136,9 +132,9 @@ export default function SetWakeUpConfig() {
              
              {/* Clickable hotspots for dummy slider */}
              <View style={styles.sliderHotspots}>
-               <TouchableOpacity style={styles.hotspot} onPress={() => setDurationAndAlert(5)} />
-               <TouchableOpacity style={styles.hotspot} onPress={() => setDurationAndAlert(10)} />
-               <TouchableOpacity style={styles.hotspot} onPress={() => setDurationAndAlert(15)} />
+               <TouchableOpacity style={styles.hotspot} onPress={() => setDuration(5)} />
+               <TouchableOpacity style={styles.hotspot} onPress={() => setDuration(10)} />
+               <TouchableOpacity style={styles.hotspot} onPress={() => setDuration(15)} />
              </View>
           </View>
 
