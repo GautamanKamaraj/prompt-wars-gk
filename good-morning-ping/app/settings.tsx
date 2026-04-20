@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Switch, Platform, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { ExternalLink } from '@/components/external-link';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [criticalEnabled, setCriticalEnabled] = useState(true);
