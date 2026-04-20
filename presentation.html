@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solaris – Awakening | Presentation</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0e35;
+      --surface:   #16173d;
+      --surface2:  #1a1b41;
+      --surface3:  #25264c;
+      --primary:   #ffb59d;
+      --secondary: #e65924;
+      --tertiary:  #eebd97;
+      --accent:    #c2c2f2;
+      --text:      #e1e0ff;
+      --muted:     #918f99;
+      --dim:       #42436b;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ─── Slide Container ──────────────────────────────────────── */
+    .deck {
+      width: 100vw; height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px 64px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(60px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+
+    /* ─── Gradient BG ambient blobs ───────────────────────────── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 500px; height: 500px; background: rgba(255,181,157,.08); top: -150px; left: -150px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(230,89,36,.06);  bottom: -100px; right: -100px; }
+
+    .slide > * { position: relative; z-index: 1; }
+
+    /* ─── Typography helpers ───────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,181,157,.12);
+      border: 1px solid rgba(255,181,157,.25);
+      color: var(--primary); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px;
+      padding: 5px 14px; border-radius: 100px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(40px, 6vw, 76px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--primary);
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      font-size: clamp(28px, 4vw, 52px);
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.5px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    p, li {
+      font-size: clamp(14px, 1.6vw, 18px);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    strong { color: var(--text); font-weight: 700; }
+
+    /* ─── Card ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,181,157,.1);
+      border-radius: 24px;
+      padding: 28px 32px;
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+    .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ─── Feature icon ─────────────────────────────────────────── */
+    .icon-wrap {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: rgba(255,181,157,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    /* ─── Gradient text ────────────────────────────────────────── */
+    .grad {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── Badge / pill ─────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      background: var(--secondary);
+      color: #390c00;
+      font-size: 11px; font-weight: 900;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ─── Timeline ─────────────────────────────────────────────── */
+    .timeline { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 720px; }
+
+    .timeline-item {
+      display: flex; gap: 20px; align-items: flex-start;
+    }
+
+    .timeline-dot {
+      flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #390c00; font-weight: 900;
+      margin-top: 2px;
+    }
+
+    /* ─── Progress bar ─────────────────────────────────────────── */
+    .progress-bar {
+      height: 4px; background: var(--surface3);
+      border-radius: 2px; overflow: hidden;
+      width: 100%; margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    /* ─── Slide navigation ─────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      background: rgba(22,23,61,.9);
+      border: 1px solid rgba(255,181,157,.15);
+      border-radius: 100px;
+      padding: 10px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    #nav button {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 20px; line-height: 1;
+      padding: 4px 8px; border-radius: 8px;
+      transition: color .2s, background .2s;
+    }
+    #nav button:hover { color: var(--primary); background: rgba(255,181,157,.1); }
+    #nav button:disabled { opacity: .3; cursor: not-allowed; }
+
+    #slide-counter {
+      font-size: 12px; font-weight: 700; color: var(--dim);
+      letter-spacing: 1px; min-width: 60px; text-align: center;
+    }
+
+    .dot-row { display: flex; gap: 6px; }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--dim); cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .dot.on { background: var(--primary); transform: scale(1.4); }
+
+    /* ─── Glow logo ────────────────────────────────────────────── */
+    .logo-circle {
+      width: 110px; height: 110px; border-radius: 55px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 52px;
+      box-shadow: 0 0 60px rgba(255,181,157,.35);
+      margin-bottom: 28px;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(255,181,157,.3); }
+      50%       { box-shadow: 0 0 80px rgba(255,181,157,.55); }
+    }
+
+    /* ─── Divider ──────────────────────────────────────────────── */
+    .divider {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 2px;
+      margin: 14px 0 24px;
+    }
+
+    /* ─── Tech stack pills ─────────────────────────────────────── */
+    .pill-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .pill {
+      background: var(--surface3);
+      border: 1px solid rgba(255,181,157,.1);
+      color: var(--text); font-size: 13px; font-weight: 600;
+      padding: 6px 16px; border-radius: 100px;
+    }
+    .pill.hi { border-color: rgba(255,181,157,.4); color: var(--primary); }
+
+    /* ─── Screen mockup ────────────────────────────────────────── */
+    .phone-frame {
+      width: 220px; height: 420px;
+      background: var(--surface);
+      border-radius: 36px;
+      border: 2px solid rgba(255,181,157,.2);
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+      flex-shrink: 0;
+    }
+    .phone-screen { width: 100%; height: 100%; padding: 16px 14px; }
+
+    /* ─── Quote highlight ──────────────────────────────────────── */
+    .quote {
+      border-left: 3px solid var(--primary);
+      padding-left: 20px;
+      font-style: italic;
+      color: var(--text);
+      font-size: clamp(16px, 2vw, 22px);
+      line-height: 1.6;
+      max-width: 680px;
+      text-align: left;
+    }
+
+    /* ─── Misc util ────────────────────────────────────────────── */
+    .mt4  { margin-top: 4px; }
+    .mt8  { margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .mt24 { margin-top: 24px; }
+    .mt32 { margin-top: 32px; }
+    .ta-c { text-align: center; }
+    .ta-l { text-align: left; }
+    .w100 { width: 100%; max-width: 900px; }
+    .mxw  { max-width: 700px; }
+    .row  { display: flex; align-items: center; gap: 24px; width: 100%; max-width: 900px; }
+
+    ul { list-style: none; }
+    ul li::before { content: "→ "; color: var(--primary); font-weight: 700; }
+    ul li + li { margin-top: 10px; }
+
+    /* ─── Kbd shortcut hint ─────────────────────────────────────── */
+    #kbd-hint {
+      position: fixed; top: 20px; right: 24px;
+      font-size: 11px; color: var(--dim);
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 1 · Title                                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide active" id="s0">
+    <div class="logo-circle">☀️</div>
+    <div class="chip">Google Event · Prompt Wars 2025</div>
+    <h1 class="ta-c">SOLARIS</h1>
+    <p style="font-size:clamp(16px,2vw,22px); letter-spacing:6px; color:var(--tertiary); text-transform:uppercase; margin-top:4px; margin-bottom:24px;">
+      AWAKENING
+    </p>
+    <p class="ta-c mxw" style="font-size:clamp(14px,1.6vw,18px); color:var(--muted); line-height:1.8;">
+      The next generation of <strong>social accountability</strong>.<br/>
+      Bypass silence. Trigger safety. Never let your circle miss a beat.
+    </p>
+    <div style="margin-top:40px;" class="pill-group">
+      <span class="pill hi">React Native</span>
+      <span class="pill hi">Expo</span>
+      <span class="pill hi">Gemini AI</span>
+      <span class="pill">Push Notifications</span>
+      <span class="pill">Geofencing</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 2 · The Problem                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s1">
+    <div class="chip">The Problem</div>
+    <h2 class="ta-c">We've all been there.</h2>
+    <div class="divider" style="margin: 14px auto 28px;"></div>
+
+    <div class="card-grid cols-3" style="max-width:860px;">
+      <div class="card ta-c">
+        <div class="icon-wrap" style="margin:0 auto 14px;">😴</div>
+        <h3 style="font-size:16px;">The Chronic Snoozer</h3>
+        <p style="font-size:13px;">Your friend keeps missing their alarm. Their phone is on silent. You have no way to reach them.</p>
+      </div>
+      <div class="card ta-c">
+        <div class="icon-wrap" style="margin:0 auto 14px;">📍</div>
+        <h3 style="font-size:16px;">The Safety Gap</h3>
+        <p style="font-size:13px;">Someone travels alone, sets an alarm, and no one knows if they're safe or just asleep.</p>
+      </div>
+      <div class="card ta-c">
+        <div class="icon-wrap" style="margin:0 auto 14px;">🔕</div>
+        <h3 style="font-size:16px;">Do Not Disturb ≠ Safe</h3>
+        <p style="font-size:13px;">Modern phones block everything. There's no "trusted circle" override for critical wake-up signals.</p>
+      </div>
+    </div>
+
+    <div class="quote mt32">
+      "Standard alarm apps solve a solo problem.<br/>
+      <strong>Solaris solves a social one.</strong>"
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 3 · The Solution                                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="chip">The Solution</div>
+    <h2 class="ta-c">Solaris — Your Wake-Up Safety Circle</h2>
+    <div class="divider" style="margin: 14px auto 28px;"></div>
+
+    <div class="row" style="align-items:flex-start; gap:40px;">
+      <div style="flex:1;">
+        <ul>
+          <li><strong>See your circle's status in real time</strong> — sleeping, active, or snoozing.</li>
+          <li style="margin-top:16px;"><strong>Send a targeted wake-up nudge</strong> with custom time, sound, and a personal note.</li>
+          <li style="margin-top:16px;"><strong>AI-generated messages</strong> — funny, sweet, urgent, or aggressive — powered by Gemini.</li>
+          <li style="margin-top:16px;"><strong>Proof-of-Life alarm</strong> — the recipient must take a selfie (or solve a math problem) to dismiss.</li>
+          <li style="margin-top:16px;"><strong>Security Radar</strong> — geofenced anomaly detection tells you when someone is out of place.</li>
+        </ul>
+      </div>
+
+      <!-- Mini phone mockup -->
+      <div class="phone-frame">
+        <div class="phone-screen" style="background:#0e0e35;">
+          <!-- mini app bar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <span style="font-size:16px;font-weight:900;color:#ffb59d;letter-spacing:-0.5px;">Solaris</span>
+            <span style="font-size:18px;">⚙️</span>
+          </div>
+          <!-- hero title -->
+          <p style="font-size:18px;font-weight:800;color:#e1e0ff;margin-bottom:10px;">Rise &amp; Shine</p>
+          <!-- Security hub card -->
+          <div style="background:#16173d;border-radius:14px;padding:12px;margin-bottom:10px;border:1px solid rgba(255,181,157,.12);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:14px;">📡</span>
+              <div>
+                <p style="font-size:11px;font-weight:700;color:#ffb59d;">Solaris Security Circle</p>
+                <p style="font-size:9px;color:#918f99;">2 Anomalies Detected</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span style="background:#0e0e35;padding:3px 8px;border-radius:8px;font-size:9px;color:#e1e0ff;">Elena: Airport</span>
+              <span style="background:#0e0e35;padding:3px 8px;border-radius:8px;font-size:9px;color:#e1e0ff;">Sarah: Out of fence</span>
+            </div>
+          </div>
+          <!-- Friend cards -->
+          <div style="background:rgba(26,27,65,.7);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#25264c;border-radius:8px;flex-shrink:0;"></div>
+            <div>
+              <p style="font-size:11px;font-weight:700;color:#e1e0ff;">Elena Vance</p>
+              <p style="font-size:9px;color:#918f99;">🌙 Sleeping · Airport</p>
+            </div>
+          </div>
+          <div style="background:rgba(26,27,65,.7);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#25264c;border-radius:8px;flex-shrink:0;"></div>
+            <div>
+              <p style="font-size:11px;font-weight:700;color:#e1e0ff;">Marcus Chen</p>
+              <p style="font-size:9px;color:#ffb59d;">☀️ Active · Home</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 4 · Feature Deep-Dive                                 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="chip">Core Features</div>
+    <h2 class="ta-c">Six screens. One mission.</h2>
+    <div class="divider" style="margin:14px auto 28px;"></div>
+
+    <div class="card-grid cols-3 w100" style="max-width:880px;">
+      <div class="card">
+        <div class="icon-wrap">👥</div>
+        <h3 style="font-size:15px;">Friends Dashboard</h3>
+        <p style="font-size:12px;">Real-time status feed: sleeping, active, snoozing. Filter, search, and select who to wake.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap">⏰</div>
+        <h3 style="font-size:15px;">Set Wake-Up</h3>
+        <p style="font-size:12px;">Pick time, method (Alarm / Message / Call), soundscape, duration, and a personal note.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap">🤖</div>
+        <h3 style="font-size:15px;">Solaris AI Assist</h3>
+        <p style="font-size:12px;">Gemini-powered message generator in four tones: Funny, Urgent, Sweet, and Aggressive.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap">📡</div>
+        <h3 style="font-size:15px;">Security Radar</h3>
+        <p style="font-size:12px;">Geofenced map view. Flags anomalies when a friend is in an unexpected location.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap">🚨</div>
+        <h3 style="font-size:15px;">Nudge Log</h3>
+        <p style="font-size:12px;">Live countdown and activity feed of all pings dispatched. Bypass-DND critical push notification.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap">📸</div>
+        <h3 style="font-size:15px;">Proof of Life Alarm</h3>
+        <p style="font-size:12px;">Wakes with a front-facing camera prompt. Dismiss only by selfie — or solve a math equation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 5 · AI Integration                                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <div class="chip">AI Integration</div>
+    <h2 class="ta-c">Powered by <span class="grad">Gemini</span></h2>
+    <div class="divider" style="margin:14px auto 28px;"></div>
+
+    <div class="row" style="align-items:stretch; gap:32px;">
+      <div style="flex:1; display:flex; flex-direction:column; gap:16px;">
+        <p style="color:var(--text);">The <strong>Solaris AI Assistant</strong> generates personalised wake-up messages for each friend, in the tone that fits the moment.</p>
+
+        <div class="card-grid cols-2" style="max-width:none;">
+          <div class="card" style="padding:16px 20px;">
+            <span class="badge" style="background:rgba(255,181,157,.2); color:#ffb59d; margin-bottom:8px; display:inline-block;">😂 Funny</span>
+            <p style="font-size:12px; color:var(--text); font-style:italic;">"Rise and shine Elena! The cereal is already judging you."</p>
+          </div>
+          <div class="card" style="padding:16px 20px;">
+            <span class="badge" style="background:rgba(255,100,80,.2); color:#ff7060; margin-bottom:8px; display:inline-block;">🚨 Urgent</span>
+            <p style="font-size:12px; color:var(--text); font-style:italic;">"EMERGENCY: Elena, your presence is required in Reality immediately!"</p>
+          </div>
+          <div class="card" style="padding:16px 20px;">
+            <span class="badge" style="background:rgba(194,194,242,.2); color:#c2c2f2; margin-bottom:8px; display:inline-block;">🌸 Sweet</span>
+            <p style="font-size:12px; color:var(--text); font-style:italic;">"Good morning Elena, the sun is waiting for your smile! ☀️"</p>
+          </div>
+          <div class="card" style="padding:16px 20px;">
+            <span class="badge" style="background:rgba(238,189,151,.2); color:#eebd97; margin-bottom:8px; display:inline-block;">🔥 Aggressive</span>
+            <p style="font-size:12px; color:var(--text); font-style:italic;">"GET OUT OF BED NOW ELENA! NO MORE EXCUSES! 🔥"</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-frame" style="height:380px;">
+        <div class="phone-screen" style="background:#16173d;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:14px;">✨</span>
+              <span style="font-size:13px;font-weight:700;color:#ffb59d;">Solaris AI</span>
+            </div>
+            <span style="font-size:16px;color:#918f99;">✕</span>
+          </div>
+          <p style="font-size:9px;font-weight:700;color:#c8c5cf;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Select Tone</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:rgba(255,181,157,.1);border:1px solid #ffb59d;border-radius:10px;padding:10px;text-align:center;">
+              <span style="font-size:10px;font-weight:700;color:#ffb59d;">Funny</span>
+            </div>
+            <div style="background:#0e0e35;border:1px solid #25264c;border-radius:10px;padding:10px;text-align:center;">
+              <span style="font-size:10px;font-weight:700;color:#918f99;">Urgent</span>
+            </div>
+            <div style="background:#0e0e35;border:1px solid #25264c;border-radius:10px;padding:10px;text-align:center;">
+              <span style="font-size:10px;font-weight:700;color:#918f99;">Sweet</span>
+            </div>
+            <div style="background:#0e0e35;border:1px solid #25264c;border-radius:10px;padding:10px;text-align:center;">
+              <span style="font-size:10px;font-weight:700;color:#918f99;">Aggressive</span>
+            </div>
+          </div>
+          <div style="background:linear-gradient(135deg,#e65924,#ffb59d);border-radius:12px;padding:10px;text-align:center;margin-bottom:12px;">
+            <span style="font-size:11px;font-weight:900;color:#390c00;">✨ Generate Message</span>
+          </div>
+          <div style="background:#0e0e35;border-radius:10px;padding:10px;border:1px solid rgba(255,181,157,.2);">
+            <p style="font-size:10px;color:#e1e0ff;font-style:italic;">"Wakey wakey, eggs and bakey Elena! The cereal is already judging you."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 6 · User Journey                                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <div class="chip">User Journey</div>
+    <h2 class="ta-c">From Worry to Wake-Up in 4 Steps</h2>
+    <div class="divider" style="margin:14px auto 28px;"></div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot">1</div>
+        <div class="card" style="flex:1; padding:18px 24px;">
+          <h3 style="font-size:16px;">Open Friends Dashboard</h3>
+          <p style="font-size:13px;">See who's sleeping, active, or snoozing. The Security Circle flags any location anomalies instantly.</p>
+          <div class="progress-bar mt8"><div class="progress-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot">2</div>
+        <div class="card" style="flex:1; padding:18px 24px;">
+          <h3 style="font-size:16px;">Select a Friend → Configure Wake-Up</h3>
+          <p style="font-size:13px;">Choose time, method, soundscape, duration, and write a note — or let <strong>Solaris AI</strong> craft the perfect message.</p>
+          <div class="progress-bar mt8"><div class="progress-fill" style="width:75%"></div></div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot">3</div>
+        <div class="card" style="flex:1; padding:18px 24px;">
+          <h3 style="font-size:16px;">Schedule → Nudge Log goes live</h3>
+          <p style="font-size:13px;">A bypass-DND push notification fires. Real-time log shows every ping dispatched. Live countdown tracks engagement.</p>
+          <div class="progress-bar mt8"><div class="progress-fill" style="width:50%"></div></div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot">4</div>
+        <div class="card" style="flex:1; padding:18px 24px;">
+          <h3 style="font-size:16px;">Proof of Life Alarm fires on the recipient's phone</h3>
+          <p style="font-size:13px;">Front camera opens. They must take a selfie — or answer 8×7 — to dismiss. <strong>No ghosting allowed.</strong></p>
+          <div class="progress-bar mt8"><div class="progress-fill" style="width:25%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 7 · Tech Stack                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <div class="chip">Tech Stack</div>
+    <h2 class="ta-c">Built Fast. Built Right.</h2>
+    <div class="divider" style="margin:14px auto 28px;"></div>
+
+    <div class="card-grid cols-2 w100" style="max-width:760px;">
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:14px;">📱 Frontend</h3>
+        <div class="pill-group" style="justify-content:flex-start;">
+          <span class="pill hi">React Native 0.81</span>
+          <span class="pill hi">Expo SDK 54</span>
+          <span class="pill">Expo Router</span>
+          <span class="pill">Linear Gradient</span>
+          <span class="pill">Reanimated 4</span>
+          <span class="pill">Expo Camera</span>
+          <span class="pill">React Native Maps</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:14px;">🔔 Device &amp; Platform</h3>
+        <div class="pill-group" style="justify-content:flex-start;">
+          <span class="pill hi">Expo Notifications</span>
+          <span class="pill hi">Bypass DND (Android)</span>
+          <span class="pill">expo-location</span>
+          <span class="pill">expo-av</span>
+          <span class="pill">Haptics</span>
+          <span class="pill">BlurView</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:14px;">🤖 Intelligence</h3>
+        <div class="pill-group" style="justify-content:flex-start;">
+          <span class="pill hi">@google/genai (Gemini)</span>
+          <span class="pill">4-tone AI generation</span>
+          <span class="pill">Smart fallback logic</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:14px;">🐳 Backend</h3>
+        <div class="pill-group" style="justify-content:flex-start;">
+          <span class="pill hi">Node.js</span>
+          <span class="pill hi">Docker</span>
+          <span class="pill">REST API</span>
+          <span class="pill">Push relay</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="ta-c mt24" style="font-size:13px; color:var(--dim);">
+      Cross-platform · iOS &amp; Android · Web preview via Expo
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 8 · Differentiators                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <div class="chip">Why Solaris?</div>
+    <h2 class="ta-c">Not just another alarm app.</h2>
+    <div class="divider" style="margin:14px auto 28px;"></div>
+
+    <div class="card-grid cols-3 w100" style="max-width:860px;">
+      <div class="card ta-c" style="border-color:rgba(255,181,157,.3);">
+        <div style="font-size:32px; margin-bottom:12px;">🤝</div>
+        <h3 style="font-size:15px; margin-bottom:8px;">Social by Design</h3>
+        <p style="font-size:12px;">Accountability works better with people you trust. Solaris puts your circle at the centre.</p>
+      </div>
+      <div class="card ta-c" style="border-color:rgba(255,181,157,.3);">
+        <div style="font-size:32px; margin-bottom:12px;">🛡️</div>
+        <h3 style="font-size:15px; margin-bottom:8px;">Safety First</h3>
+        <p style="font-size:12px;">Geofencing + anomaly detection means you also know <em>where</em> your people are, not just <em>if</em> they're awake.</p>
+      </div>
+      <div class="card ta-c" style="border-color:rgba(255,181,157,.3);">
+        <div style="font-size:32px; margin-bottom:12px;">✅</div>
+        <h3 style="font-size:15px; margin-bottom:8px;">Verified Awake</h3>
+        <p style="font-size:12px;">Proof-of-Life eliminates "I dismissed it in my sleep." Camera or cognitive test. No cheating.</p>
+      </div>
+    </div>
+
+    <div class="card mt24" style="max-width:680px; width:100%; border-color:rgba(255,181,157,.25);">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="font-size:28px; flex-shrink:0;">💡</div>
+        <p style="font-size:14px; color:var(--text); line-height:1.7;">
+          Solaris was purpose-built in a hackathon sprint — using AI-first development to maximise features,
+          polish, and real platform integration within the event window.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 9 · Closing / CTA                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <div class="logo-circle" style="width:90px;height:90px;font-size:42px;">☀️</div>
+    <h1 class="ta-c">Wake up.<br/><span class="grad">Together.</span></h1>
+    <div class="divider" style="margin:20px auto;"></div>
+    <p class="ta-c mxw" style="font-size:clamp(14px,1.7vw,19px); color:var(--muted); line-height:1.8;">
+      Solaris is more than an alarm. It's a <strong>social safety net</strong> that keeps your circle
+      accountable, connected, and most importantly — <strong>awake</strong>.
+    </p>
+
+    <div class="card-grid cols-3 mt32" style="max-width:640px;">
+      <div class="card ta-c" style="padding:16px;">
+        <p style="font-size:28px; font-weight:900; color:var(--primary);">6</p>
+        <p style="font-size:12px;">App Screens</p>
+      </div>
+      <div class="card ta-c" style="padding:16px;">
+        <p style="font-size:28px; font-weight:900; color:var(--primary);">4</p>
+        <p style="font-size:12px;">AI Tones</p>
+      </div>
+      <div class="card ta-c" style="padding:16px;">
+        <p style="font-size:28px; font-weight:900; color:var(--primary);">1</p>
+        <p style="font-size:12px;">Mission</p>
+      </div>
+    </div>
+
+    <p class="ta-c mt32" style="font-size:13px; color:var(--dim); letter-spacing:2px; text-transform:uppercase;">
+      Built with ❤️ for Google Prompt Wars 2025
+    </p>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- ─── Navigation ────────────────────────────────────────────── -->
+<div id="nav">
+  <button id="btn-prev" title="Previous (←)">‹</button>
+  <div class="dot-row" id="dots"></div>
+  <span id="slide-counter">1 / 9</span>
+  <button id="btn-next" title="Next (→)">›</button>
+</div>
+
+<p id="kbd-hint">← → keys to navigate</p>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('slide-counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  let current = 0;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(n) {
+    if (n === current) return;
+    const prev = slides[current];
+    prev.classList.add('exit');
+    prev.classList.remove('active');
+    setTimeout(() => prev.classList.remove('exit'), 350);
+
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+
+    // Update dots
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === current));
+    counter.textContent = `${current + 1} / ${slides.length}`;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === slides.length - 1;
+  }
+
+  btnPrev.addEventListener('click', () => goTo(current - 1));
+  btnNext.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     goTo(current - 1);
+  });
+
+  // Init state
+  btnPrev.disabled = true;
+  counter.textContent = `1 / ${slides.length}`;
+</script>
+</body>
+</html>
